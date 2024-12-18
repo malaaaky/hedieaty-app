@@ -1,7 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:hedieaty/widgets/login_from_widget.dart';
-import'package:hedieaty/utils/constants.dart';
+import 'package:hedieaty/src/widgets/login_from_widget.dart';
+import'package:hedieaty/src/utils/constants.dart';
+import 'package:hedieaty/src/widgets/animated_image_widget.dart';
 
 class LoginScreen extends StatelessWidget {
   @override
@@ -21,6 +22,7 @@ class LoginScreen extends StatelessWidget {
           builder: (context, constraints) {
             final availableHeight = constraints.maxHeight;
             return SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: SizedBox(
                 width: double.infinity,
                 child: Column(
@@ -57,61 +59,6 @@ class LoginScreen extends StatelessWidget {
           },
         ),
       ),
-    );
-  }
-}
-
-class AnimatedImage extends StatefulWidget {
-  @override
-  _AnimatedImageState createState() => _AnimatedImageState();
-}
-
-class _AnimatedImageState extends State<AnimatedImage>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 3),
-  )..repeat(reverse: true);
-
-  late final Animation<Offset> _animation = Tween<Offset>(
-    begin: Offset.zero,
-    end: Offset(0, 0.08),
-  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          top: 5, // Adjusted vertical position to create space
-          right:50,
-          child: Image.asset(
-            'lib/assets/ballons_login_page.png',
-            width: 300, // Set your desired width
-            height: 150, // Set your desired height,
-            fit: BoxFit.contain,
-          ),
-        ),
-        Positioned(
-          top: 120, // Adjusted vertical position to create space
-          left: 75,   // Adjusted horizontal position
-          child: SlideTransition(
-            position: _animation,
-            child: Image.asset(
-              'lib/assets/gift_login_img.png',
-              width: 200, // Set your desired width
-              height: 200, // Set your desired height,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

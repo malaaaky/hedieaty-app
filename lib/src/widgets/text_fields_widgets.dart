@@ -4,6 +4,7 @@ Widget buildTextField({
   required String hintText,
   required IconData icon,
   required String? Function(String?) validator,
+  required Function(String) onChanged,
 }) {
   return TextFormField(
     decoration: InputDecoration(
@@ -26,7 +27,9 @@ Widget buildTextField({
   );
 }
 
-Widget buildPasswordField(bool isPasswordHidden, VoidCallback onPasswordToggle) {
+Widget buildPasswordField(bool isPasswordHidden,
+    VoidCallback onPasswordToggle,
+    {required Function(String) onChanged}) {
   return TextFormField(
     obscureText: isPasswordHidden,
     decoration: InputDecoration(
@@ -61,6 +64,7 @@ Widget buildPasswordField(bool isPasswordHidden, VoidCallback onPasswordToggle) 
       }
       return null;
     },
+    onChanged: onChanged,
   );
 }
 

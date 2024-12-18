@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hedieaty/widgets/text_fields_widgets.dart';
-import 'package:hedieaty/screens/login_page.dart';
+import 'package:hedieaty/src/widgets/text_fields_widgets.dart';
+import 'package:hedieaty/src/screens/authentication/view/login_page.dart';
 
 class SignUpForm extends StatefulWidget {
   @override
@@ -8,6 +8,10 @@ class SignUpForm extends StatefulWidget {
 }
 
 class _SignUpFormState extends State<SignUpForm> {
+  late String name;
+  late String email;
+  late String password;
+
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordHidden = true;
 
@@ -20,6 +24,7 @@ class _SignUpFormState extends State<SignUpForm> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Form(
@@ -31,6 +36,11 @@ class _SignUpFormState extends State<SignUpForm> {
                 icon: Icons.person,
                 validator: (value) =>
                 value == null || value.isEmpty ? 'Please enter a username' : null,
+                onChanged: (value) {
+                  setState(() {
+                    name = value;
+                  });
+                },
               ),
               SizedBox(height: 15),
               buildTextField(
@@ -46,9 +56,20 @@ class _SignUpFormState extends State<SignUpForm> {
                   }
                   return null;
                 },
+                onChanged: (value) {
+                  setState(() {
+                    email = value;
+                  });
+                },
               ),
               SizedBox(height: 15),
-              buildPasswordField(_isPasswordHidden, _togglePasswordVisibility),
+              buildPasswordField(_isPasswordHidden,
+                _togglePasswordVisibility,
+                onChanged: (value) {
+                  setState(() {
+                    password = value;
+                  });
+                },),
               SizedBox(height: 20),
               buildActionButton(
                 context,
@@ -56,6 +77,9 @@ class _SignUpFormState extends State<SignUpForm> {
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
                     // TODO: Handle sign up logic
+                    print('Name: $name');
+                    print('Email: $email');
+                    print('Password: $password');
                   }
                 },
               ),
