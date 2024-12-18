@@ -1,9 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:hedieaty/widgets/login_from_widget.dart';
+import 'package:hedieaty/widgets/signup_form_widget.dart';
 import'package:hedieaty/utils/constants.dart';
 
-class LoginScreen extends StatelessWidget {
+
+class SignUpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
@@ -19,41 +20,50 @@ class LoginScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         body: LayoutBuilder(
           builder: (context, constraints) {
-            final availableHeight = constraints.maxHeight;
+            // final availableHeight = constraints.maxHeight;
             return SingleChildScrollView(
-              child: SizedBox(
-                width: double.infinity,
-                child: Column(
-                  children: [
-                    SizedBox(height: topPadding),
-                    SizedBox(height: 10),
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: availableHeight * 0.4,
-                      ),
-                      child: AnimatedImage(),
+              // child: SizedBox(
+              //   width: double.infinity,
+              //   child: Column(
+              //     children: [
+              //       SizedBox(height: topPadding),
+              //       SizedBox(height: 10),
+              //       ConstrainedBox(
+              //         constraints: BoxConstraints(
+              //           maxHeight: availableHeight * 0.4,
+              //         ),
+              //         child: AnimatedImage(),
+              //       ),
+              child: Column(
+                children: [
+                  SizedBox(height: topPadding),
+                  SizedBox(height: 10),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: constraints.maxHeight * 0.4, // Adjusted constraint for the image
                     ),
+                    child: AnimatedImage(),
+                  ),
                     SizedBox(height: 20),
                     Text(
-                      "Hi User",
+                      "Welcome",
                       style: TextStyle(
-                        color: christmasWhite, // White text
+                        color: christmasWhite,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 10),
                     Text(
-                      "Let's Get Started",
+                      "Create Your Account",
                       style: TextStyle(color: christmasWhite, fontSize: 18),
                     ),
                     SizedBox(height: 20),
-                    LoginForm(),
+                    SignUpForm(),
                     SizedBox(height: 20),
                   ],
                 ),
-              ),
-            );
+              );
           },
         ),
       ),
@@ -80,37 +90,37 @@ class _AnimatedImageState extends State<AnimatedImage>
 
   @override
   void dispose() {
+    _controller.dispose();  // Dispose the AnimationController properly
     super.dispose();
-    _controller.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Positioned(
-          top: 5, // Adjusted vertical position to create space
-          right:50,
-          child: Image.asset(
-            'lib/assets/ballons_login_page.png',
-            width: 300, // Set your desired width
-            height: 150, // Set your desired height,
-            fit: BoxFit.contain,
-          ),
-        ),
-        Positioned(
-          top: 120, // Adjusted vertical position to create space
-          left: 75,   // Adjusted horizontal position
-          child: SlideTransition(
-            position: _animation,
-            child: Image.asset(
-              'lib/assets/gift_login_img.png',
-              width: 200, // Set your desired width
-              height: 200, // Set your desired height,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
+      Positioned(
+      top: 5,
+      right: 50,
+      child: Image.asset(
+        'lib/assets/ballons_login_page.png',
+        width: 300,
+        height: 150,
+        fit: BoxFit.contain,
+      ),
+    ),
+    Positioned(
+    top: 120,
+    left: 75,
+    child: SlideTransition(
+    position: _animation,
+    child: Image.asset(
+    'lib/assets/gift_login_img.png',
+    width: 200,
+    height: 200,
+      fit: BoxFit.contain,
+    ),
+    ),
+    ),
       ],
     );
   }

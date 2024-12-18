@@ -1,145 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:hedieaty/widgets/text_fields_widgets.dart';
 import 'package:hedieaty/screens/login_page.dart';
 
-
-class SignupForm extends StatefulWidget {
-  final Function onSubmit; // Callback for form submission
-  SignupForm({required this.onSubmit});
+class SignUpForm extends StatefulWidget {
   @override
-  _SignupFormState createState() => _SignupFormState();
+  _SignUpFormState createState() => _SignUpFormState();
 }
 
-class _SignupFormState extends State<SignupForm> {
+class _SignUpFormState extends State<SignUpForm> {
   final _formKey = GlobalKey<FormState>();
-  bool _obscureText = true; // Control password visibility
+  bool _isPasswordHidden = true;
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _isPasswordHidden = !_isPasswordHidden;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
-    child: SizedBox( //Wrap with SizedBox
-    width: MediaQuery.of(context).size.width * 0.8, //80% of screen width
-    child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              decoration: InputDecoration(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              buildTextField(
                 hintText: "Username",
-                prefixIcon: Icon(Icons.person, color: christmasWhite),
-                hintStyle: TextStyle(color: christmasWhite.withOpacity(0.7)),
-                filled: true,
-                fillColor: christmasGold.withOpacity(0.2),
-                contentPadding:
-                EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: christmasWhite),
-                ),
+                icon: Icons.person,
+                validator: (value) =>
+                value == null || value.isEmpty ? 'Please enter a username' : null,
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your username';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 15),
-            TextFormField(
-              decoration: InputDecoration(
+              SizedBox(height: 15),
+              buildTextField(
                 hintText: "Email",
-                prefixIcon: Icon(Icons.email, color: christmasWhite),
-                hintStyle: TextStyle(color: christmasWhite.withOpacity(0.7)),
-                filled: true,
-                fillColor: christmasRed.withOpacity(0.2),
-                contentPadding:
-                EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: christmasWhite),
-                ),
+                icon: Icons.email,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an email';
+                  }
+                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(
+                      value)) {
+                    return 'Please enter a valid email';
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                if (!value.contains('@')) {
-                  return 'Please enter a valid email';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 15),
-            TextFormField(
-              obscureText: _obscureText,
-              decoration: InputDecoration(
-                hintText: "Password",
-                prefixIcon: Icon(Icons.lock, color: christmasWhite),
-                hintStyle: TextStyle(color: christmasWhite.withOpacity(0.7)),
-                filled: true,
-                fillColor: christmasGold.withOpacity(0.2),
-                contentPadding:
-                EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: christmasWhite),
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscureText ? Icons.visibility : Icons.visibility_off,
-                    color: christmasWhite,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
-                  },
-                ),
+              SizedBox(height: 15),
+              buildPasswordField(_isPasswordHidden, _togglePasswordVisibility),
+              SizedBox(height: 20),
+              buildActionButton(
+                context,
+                "Sign Up",
+                onPressed: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    // TODO: Handle sign up logic
+                  }
+                },
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  widget.onSubmit(); // Call the callback
-                }
-              },
-              child: Text(
-                "Submit",
-                style: TextStyle(color: Colors.white),
+              SizedBox(height: 10),
+              buildOrDivider(),
+              SizedBox(height: 10),
+              buildActionButton(
+                context,
+                "Already have an account?",
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                },
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: christmasRouge,
-                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                textStyle: TextStyle(fontSize: 18),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 }
