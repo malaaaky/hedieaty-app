@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 import 'package:hedieaty/src/screens/authentication/model/user_model.dart';
 import 'package:hedieaty/src/screens/authentication/model/user_session.dart';
@@ -13,9 +11,11 @@ import 'package:hedieaty/src/widgets/bottom_navigator_bar_widget.dart';
 import 'package:hedieaty/src/utils/constants.dart';
 
 import 'package:hedieaty/src/screens/events/view/event_list_page.dart';
-import 'package:hedieaty/src/screens/friends/view/add_friend.dart';
+import 'package:hedieaty/src/screens/friends/view/add_friend_widget.dart';
 import 'package:hedieaty/src/screens/profile_page.dart';
-import 'gift/gifts_db.dart';
+
+import 'events/model/event_model.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -51,9 +51,6 @@ class _HomePageState extends State<HomePage> {
         break;
     }
   }
-
-  HedieatyDatabase eventDatabase = HedieatyDatabase.instance;
-  HedieatyUserDatabase userDatabase = HedieatyUserDatabase.instance;
 
   TextEditingController searchController = TextEditingController();
 
@@ -144,7 +141,7 @@ class _HomePageState extends State<HomePage> {
             AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              title: const Text(
+              title: Text(
                 'Home Page',
                 style: TextStyle(
                   color: christmasWhite,
@@ -154,7 +151,7 @@ class _HomePageState extends State<HomePage> {
               ),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.event, color: christmasWhite),
+                  icon: Icon(Icons.event, color: christmasWhite),
                   tooltip: 'View Events',
                   onPressed: () {
                     Navigator.push(
@@ -169,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.account_circle, color: christmasWhite),
+                  icon: Icon(Icons.account_circle, color: christmasWhite),
                   tooltip: 'Profile',
                   onPressed: () {
                     Navigator.push(
@@ -219,7 +216,7 @@ class _HomePageState extends State<HomePage> {
             ),
             Expanded(
               child: friends.isEmpty
-                  ? const Center(
+                  ? Center(
                 child: Text(
                   'No friends to display.',
                   style: TextStyle(
@@ -239,8 +236,12 @@ class _HomePageState extends State<HomePage> {
                     child: ListTile(
                       leading: CircleAvatar(
                         radius: 40,
-                        child: Image.asset(friend.profilePicture ??
-                            'assets/images/profile_pictures/pic6.jpg'),
+                        backgroundImage: friend.profilePicture != null
+                            ? AssetImage(friend.profilePicture!)  // Make sure the profilePicture is not null and cast it appropriately
+                            : AssetImage('lib/assets/guest_avatar_img.png'), // Fallback image
+                        child: friend.profilePicture == null
+                            ? const Icon(Icons.person) // Placeholder icon if no image is available
+                            : null,
                       ),
                       title: Text(
                         friend.name ?? "",
@@ -286,6 +287,10 @@ class _HomePageState extends State<HomePage> {
         tooltip: 'Add Friend via Phone Number or Contact List',
         backgroundColor: christmasRouge,
         child: const Icon(Icons.person_add, color: Colors.white),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }

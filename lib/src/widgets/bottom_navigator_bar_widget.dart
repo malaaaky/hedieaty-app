@@ -32,7 +32,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.card_giftcard),
-          label: 'Gifts',
+          label: ' Pledged Gifts',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),

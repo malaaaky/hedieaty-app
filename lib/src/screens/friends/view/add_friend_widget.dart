@@ -5,22 +5,19 @@ import'package:hedieaty/src/screens/friends/model/friend_model.dart';
 import'package:hedieaty/src/screens/authentication/model/user_model.dart';
 import 'package:hedieaty/src/screens/authentication/model/user_session.dart';
 import 'package:hedieaty/src/screens/home_page.dart';
+import 'package:hedieaty/src/utils/constants.dart';
 
 
-
+// needs both id
 class FriendDetailsView extends StatefulWidget {
   const FriendDetailsView({super.key, this.userId, this.friendId});
-
   final int? userId;
   final int? friendId;
-
   @override
   State<FriendDetailsView> createState() => _FriendDetailsViewState();
 }
 
 class _FriendDetailsViewState extends State<FriendDetailsView> {
-  HedieatyDatabase friendDatabase = HedieatyDatabase.instance;
-
   List<UserModel> friends = [];
   bool isLoading = false;
   bool isNewFriend = true;
@@ -61,7 +58,7 @@ class _FriendDetailsViewState extends State<FriendDetailsView> {
     });
   }
 
-  deleteFriend() {
+  void deleteFriend() {
     Navigator.pop(context);
   }
 
@@ -72,8 +69,8 @@ class _FriendDetailsViewState extends State<FriendDetailsView> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.pink.shade100,
-              Colors.yellow.shade100,
+              christmasRed,
+              christmasGold,
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -85,7 +82,7 @@ class _FriendDetailsViewState extends State<FriendDetailsView> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.pink),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {
                   Navigator.pushReplacement(
                       context,
@@ -98,24 +95,24 @@ class _FriendDetailsViewState extends State<FriendDetailsView> {
                   visible: !isNewFriend,
                   child: IconButton(
                     onPressed: deleteFriend,
-                    icon: const Icon(Icons.delete, color: Colors.pink),
+                    icon: const Icon(Icons.delete, color: Colors.white),
                   ),
                 ),
               ],
-              title: const Text(
+              title:  Text(
                 'Add Friends',
                 style: TextStyle(
-                    color: Colors.pink, fontSize: 24, fontWeight: FontWeight.bold),
+                    color: christmasGold, fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: friends.isEmpty
-                    ? const Center(
+                    ? Center(
                   child: Text(
                     'No Users yet',
-                    style: TextStyle(fontSize: 16, color: Colors.pink),
+                    style: TextStyle(fontSize: 16, color: christmasGold),
                   ),
                 )
                     : ListView.builder(
@@ -125,7 +122,6 @@ class _FriendDetailsViewState extends State<FriendDetailsView> {
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       child: ListTile(
-
                         title: Text(
                           user.name ?? "",
                           style: const TextStyle(
@@ -143,7 +139,7 @@ class _FriendDetailsViewState extends State<FriendDetailsView> {
                             setState(() {});
                           },
                           child: const Icon(Icons.person_add, color: Colors.white),
-                          backgroundColor: Colors.pink,
+                          backgroundColor: christmasRed,
                         ),
                       ),
                     );
@@ -167,9 +163,6 @@ class _FriendDetailsViewState extends State<FriendDetailsView> {
           context,
           MaterialPageRoute(builder: (context) => HomePage()))
     });
-
-    await friendDatabase.createFriend(
-        Friend(userId: UserSession.currentUserId!, friendId: id));
   }
 }
 

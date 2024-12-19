@@ -71,6 +71,7 @@ class _SignUpFormState extends State<SignUpForm> {
           // Convert image to base64
           String base64Image = await resizeAndEncodeImage(_profileImage!);
 
+          // create firebase collection
           _uid =FirebaseAuth.instance.currentUser!.uid;
           // wait for saving before any thing
           await Users.doc(_uid).set({

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hedieaty/src/screens/authentication/model/user_session.dart';
 import 'firebase_options.dart';
 
 import 'package:hedieaty/src/screens/gifts/view/gift_list_page.dart';
@@ -40,7 +41,7 @@ class HedieatyApp extends StatelessWidget {
         '/login':(context)=> LoginScreen(),
         '/signup':(context)=> SignUpScreen(),
         '/home': (context) => HomePage(),
-        '/events': (context) => EventsPage(),
+        '/events': (context) => EventListPage(userID: UserSession.currentUserId!.toInt(), userName: "My Events"),
         '/gifts': (context) => GiftsPage(),
         '/profile': (context) => ProfileScreen(documentId : FirebaseAuth.instance.currentUser!.uid),
 

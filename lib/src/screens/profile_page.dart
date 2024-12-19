@@ -6,10 +6,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:hedieaty/src/utils/constants.dart';
+import 'authentication/model/user_session.dart';
 import 'events/view/event_list_page.dart';
 import 'gifts/view/gift_list_page.dart';
 import 'home_page.dart';
 import 'package:hedieaty/src/widgets/profile_widgets.dart';
+import 'package:hedieaty/src/screens/events/view/event_list_page.dart';
 
 
 // to get documentId : FirebaseAuth.instance.currentUser!.uid
@@ -150,7 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                     buildActionButton(
                                       context,
-                                      label: 'Gifts',
+                                      label: ' Gifts',
                                       color: christmasGold,
                                       textColor: christmasRed,
                                       onPressed: () {
@@ -171,9 +173,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => EventsPage(),
-                                          ),
-                                        );
+                                            builder: (context) => EventListPage(userID: UserSession.currentUserId!.toInt(), userName: "My Events")),
+                                          );
                                       },
                                     ),
                                   ],
@@ -198,18 +199,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         icon: Icons.email,
                                         subTitle: data['email'],
                                         title: 'Email Address',
-                                      ),
-                                      const YellowDivider(),
-                                      RepeatedListTile(
-                                        icon: Icons.phone,
-                                        subTitle: data['phone'],
-                                        title: 'Phone No.',
-                                      ),
-                                      const YellowDivider(),
-                                       RepeatedListTile(
-                                        icon: Icons.location_pin,
-                                        subTitle: data['address'],
-                                        title: 'Address',
                                       ),
                                     ]),
                                     const ProfileHeaderLabel(
