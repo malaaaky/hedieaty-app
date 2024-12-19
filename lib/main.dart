@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
+import 'package:hedieaty/src/screens/gifts/view/gift_list_page.dart';
 import 'package:hedieaty/src/screens/authentication/view/login_page.dart'; // Import your login page
 import 'package:hedieaty/src/screens/authentication/view/signup_page.dart';
-import 'package:hedieaty/src/screens/events/event_list_page.dart';
-import 'package:hedieaty/src/screens/gifts/gift_list_page.dart';
+import 'package:hedieaty/src/screens/events/view/event_list_page.dart';
 import 'package:hedieaty/src/screens/profile_page.dart';
 import 'package:hedieaty/src/screens/home_page.dart';
 

@@ -4,10 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hedieaty/src/utils/constants.dart';
 
-import 'events/event_list_page.dart';
-import 'gifts/gift_list_page.dart';
+import 'package:hedieaty/src/utils/constants.dart';
+import 'events/view/event_list_page.dart';
+import 'gifts/view/gift_list_page.dart';
 import 'home_page.dart';
 import 'package:hedieaty/src/widgets/profile_widgets.dart';
 
