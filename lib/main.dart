@@ -17,6 +17,7 @@ Future<void> main() async{
     // Optionally, print the stack trace if needed
     // debugPrint(details.stack.toString());
   };
+
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

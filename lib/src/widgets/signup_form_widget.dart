@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:hedieaty/src/widgets/text_fields_widgets.dart';
 import 'package:hedieaty/src/screens/authentication/view/login_page.dart';
+
+import 'dart:async';
 
 class SignUpForm extends StatefulWidget {
   @override
@@ -10,9 +13,9 @@ class SignUpForm extends StatefulWidget {
 }
 
 class _SignUpFormState extends State<SignUpForm> {
-  late String name;
-  late String email;
-  late String password;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordHidden = true;
@@ -25,6 +28,83 @@ class _SignUpFormState extends State<SignUpForm> {
     });
   }
 
+  Future<void> signUp() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      if (_profileImage != null) {
+        try {
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
+          // Clear form fields and reset profile image
+          _formKey.currentState!.reset();
+          _emailController.clear();
+          _passwordController.clear();
+          _nameController.clear();
+          setState(() {
+            _profileImage = null;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Sign up successful!"),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Navigate to login or home screen after successful sign up
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+          );
+        } on FirebaseAuthException catch (e) {
+          String errorMessage;
+          switch (e.code) {
+            case 'email-already-in-use':
+              errorMessage = "This email is already registered.";
+              break;
+            case 'weak-password':
+              errorMessage = "The password is too weak.";
+              break;
+            case 'invalid-email':
+              errorMessage = "The email address is invalid.";
+              break;
+            default:
+              errorMessage = "An error occurred. Please try again.";
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+            ),
+          );
+         } catch (e) {
+          // debugging purpose
+          print('Unexpected error: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("An unexpected error occurred: $e"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Please pick an image first"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Please fill all required fields"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -33,6 +113,7 @@ class _SignUpFormState extends State<SignUpForm> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -66,61 +147,43 @@ class _SignUpFormState extends State<SignUpForm> {
                 ],
               ),
               SizedBox(height: 20),
-              buildTextField(
+              buildTextFieldController(
+                controller: _nameController,
                 hintText: "Username",
                 icon: Icons.person,
                 validator: (value) =>
-                value == null || value.isEmpty ? 'Please enter a username' : null,
-                onChanged: (value) {
-                  setState(() {
-                    name = value;
-                  });
-                },
+                value == null || value.isEmpty
+                    ? 'Please enter a username'
+                    : null,
               ),
               SizedBox(height: 15),
-              buildTextField(
+              buildTextFieldController(
+                controller: _emailController,
                 hintText: "Email",
                 icon: Icons.email,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter an email';
                   }
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(
-                      value)) {
+                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                      .hasMatch(value)) {
                     return 'Please enter a valid email';
                   }
                   return null;
                 },
-                onChanged: (value) {
-                  setState(() {
-                    email = value;
-                  });
-                },
               ),
               SizedBox(height: 15),
-              buildPasswordField(_isPasswordHidden,
+              buildPasswordFieldController(
+                _isPasswordHidden,
                 _togglePasswordVisibility,
-                onChanged: (value) {
-                  setState(() {
-                    password = value;
-                  });
-                },),
+                controller: _passwordController,
+              ),
               SizedBox(height: 20),
               buildActionButton(
                 context,
                 "Sign Up",
                 onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    // TODO: Handle sign up logic
-                    print('Name: $name');
-                    print('Email: $email');
-                    print('Password: $password');
-                    if (_profileImage != null) {
-                      print('Profile Image Path: ${_profileImage!.path}');
-                    } else {
-                      print('No profile image selected.');
-                    }
-                  }
+                  signUp();
                 },
               ),
               SizedBox(height: 10),
