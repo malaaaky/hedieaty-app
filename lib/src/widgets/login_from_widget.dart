@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hedieaty/src/screens/home_page.dart';
 import 'package:hedieaty/src/widgets/text_fields_widgets.dart';
 import 'package:hedieaty/src/screens/authentication/view/signup_page.dart';
+import '../utils/constants.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class LoginForm extends StatefulWidget {
   @override
@@ -8,11 +14,13 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  late String username;
-  late String password;
-  
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordHidden = true;
+  bool processing = false;
+
   void _togglePasswordVisibility() {
     setState(() {
       _isPasswordHidden = !_isPasswordHidden;
@@ -27,38 +35,45 @@ class _LoginFormState extends State<LoginForm> {
         key: _formKey,
         child: Column(
           children: [
-            buildTextField(
-              hintText: "Username",
-              icon: Icons.person,
-              validator: (value) =>
-              value == null || value.isEmpty ? 'Please enter your username' : null,
-              onChanged: (value) {
-                setState(() {
-                  username = value;
-                });
+            buildTextFieldController(
+              controller: _emailController,
+              hintText: "Email",
+              icon: Icons.email,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter an email';
+                }
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                    .hasMatch(value)) {
+                  return 'Please enter a valid email';
+                }
+                return null;
               },
             ),
             SizedBox(height: 15),
-            buildPasswordField(_isPasswordHidden,
+            buildPasswordFieldController(
+              _isPasswordHidden,
               _togglePasswordVisibility,
-              onChanged: (value) {
-                setState(() {
-                  password = value;
-                });
-              },),
+              controller: _passwordController,
+            ),
+            SizedBox(height: 10),
+            TextButton(
+                onPressed: () {},
+                child: const Text(
+                  'Forget Password ?',
+                  style: TextStyle(
+                      fontSize: 18, fontStyle: FontStyle.italic),
+                )),
             SizedBox(height: 20),
+            processing == true
+                ? CircularProgressIndicator(
+              color: christmasGreen,
+            ) :
             buildActionButton(
               context,
               "Login",
               onPressed: () {
-                if (_formKey.currentState?.validate() ?? false) {
-                  // Handle login logic
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Login successful!"),),
-                  );
-                  // Navigate to Home Screen
-                  Navigator.pushReplacementNamed(context, '/home');
-                }
+                login();
               },
             ),
             SizedBox(height: 10),
@@ -68,8 +83,7 @@ class _LoginFormState extends State<LoginForm> {
               context,
               "Create an Account",
               onPressed: () {
-                // Navigate to the SignupPage
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => SignUpScreen()),
                 );
@@ -81,5 +95,81 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-
+  Future<void> login() async {
+    setState(() {
+      processing = true;
+    });
+    //check validation
+    if (_formKey.currentState?.validate() ?? false) {
+      //firebase create user
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+        // Clear form fields and reset profile image
+        _formKey.currentState!.reset();
+        _passwordController.clear();
+        _emailController.clear();
+        //snack bar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Login successful!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Navigate to login or home screen after successful sign up
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+        //exception handling
+      } on FirebaseAuthException catch (e) {
+        String errorMessage;
+        print("Error code: ${e.code}");
+        switch (e.code) {
+          case 'user-not-found':
+            errorMessage = "No user found for that email.";
+            break;
+          case 'invalid-credential':
+            errorMessage = "Wrong email/password provided for that user.";
+            break;
+          default:
+            errorMessage = "An error occurred. Please try again.";
+        }
+        setState(() {
+          processing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );
+        // debugging purpose
+      } catch (e) {
+        print('Unexpected error: $e');
+        setState(() {
+          processing = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("An unexpected error occurred: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      //failed case
+    } else {
+      setState(() {
+        processing = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Please fill all required fields"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 }

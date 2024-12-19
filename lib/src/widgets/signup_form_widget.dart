@@ -1,13 +1,18 @@
+import 'dart:io';
+import 'dart:convert';
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:hedieaty/src/widgets/text_fields_widgets.dart';
 import 'package:hedieaty/src/screens/authentication/view/login_page.dart';
-import 'dart:convert';
+import '../utils/constants.dart';
 import 'package:image/image.dart' as img;
-import 'dart:async';
+
+
 
 class SignUpForm extends StatefulWidget {
   @override
@@ -21,6 +26,8 @@ class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _nameController = TextEditingController();
   late String profileImage;
   late String _uid;
+  bool processing = false;
+
   //form key
   final _formKey = GlobalKey<FormState>();
   //password boolean
@@ -47,6 +54,9 @@ class _SignUpFormState extends State<SignUpForm> {
 
 
   Future<void> signUp() async {
+    setState(() {
+      processing = true;
+    });
     //check validation
     if (_formKey.currentState?.validate() ?? false) {
       // check image null
@@ -109,6 +119,9 @@ class _SignUpFormState extends State<SignUpForm> {
             default:
               errorMessage = "An error occurred. Please try again.";
           }
+          setState(() {
+            processing = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(errorMessage),
@@ -118,6 +131,9 @@ class _SignUpFormState extends State<SignUpForm> {
           // debugging purpose
          } catch (e) {
           print('Unexpected error: $e');
+          setState(() {
+            processing = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("An unexpected error occurred: $e"),
@@ -127,6 +143,9 @@ class _SignUpFormState extends State<SignUpForm> {
         }
         //failed case
       } else {
+        setState(() {
+          processing = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Please pick an image first"),
@@ -136,6 +155,9 @@ class _SignUpFormState extends State<SignUpForm> {
       }
       //failed case
     } else {
+      setState(() {
+        processing = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Please fill all required fields"),
@@ -219,6 +241,10 @@ class _SignUpFormState extends State<SignUpForm> {
                 controller: _passwordController,
               ),
               SizedBox(height: 20),
+              processing == true
+                  ? CircularProgressIndicator(
+                color: christmasGreen,
+              ):
               buildActionButton(
                 context,
                 "Sign Up",
