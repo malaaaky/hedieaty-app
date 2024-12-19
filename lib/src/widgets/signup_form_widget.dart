@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:hedieaty/src/widgets/text_fields_widgets.dart';
 import 'package:hedieaty/src/screens/authentication/view/login_page.dart';
-
+import 'dart:convert';
+import 'package:image/image.dart' as img;
 import 'dart:async';
 
 class SignUpForm extends StatefulWidget {
@@ -13,14 +15,21 @@ class SignUpForm extends StatefulWidget {
 }
 
 class _SignUpFormState extends State<SignUpForm> {
+  // text fields
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-
+  late String profileImage;
+  late String _uid;
+  //form key
   final _formKey = GlobalKey<FormState>();
+  //password boolean
   bool _isPasswordHidden = true;
+  //image picker
   File? _profileImage;
   final ImagePicker _picker = ImagePicker();
+  // cloud firestore collection
+  CollectionReference Users= FirebaseFirestore.instance.collection('Users');
 
   void _togglePasswordVisibility() {
     setState(() {
@@ -28,14 +37,41 @@ class _SignUpFormState extends State<SignUpForm> {
     });
   }
 
+  Future<String> resizeAndEncodeImage(File imageFile) async {
+    final bytes = await imageFile.readAsBytes();
+    final image = img.decodeImage(bytes);
+    final resized = img.copyResize(image!, width: 300); // Adjust width as needed
+    final jpg = img.encodeJpg(resized, quality: 85); // Adjust quality as needed
+    return base64Encode(jpg);
+  }
+
+
   Future<void> signUp() async {
+    //check validation
     if (_formKey.currentState?.validate() ?? false) {
+      // check image null
       if (_profileImage != null) {
+        //firebase create user
         try {
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
           );
+
+          // Convert image to base64
+          String base64Image = await resizeAndEncodeImage(_profileImage!);
+
+          _uid =FirebaseAuth.instance.currentUser!.uid;
+          // wait for saving before any thing
+          await Users.doc(_uid).set({
+            'name': _nameController.text.trim(),
+            'email':_emailController.text.trim(),
+            'profileimage':base64Image,
+            'phone': '',
+            'address': '',
+            'uid' : _uid,
+          });
+
           // Clear form fields and reset profile image
           _formKey.currentState!.reset();
           _emailController.clear();
@@ -45,6 +81,7 @@ class _SignUpFormState extends State<SignUpForm> {
             _profileImage = null;
           });
 
+          //snack bar
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Sign up successful!"),
@@ -56,6 +93,7 @@ class _SignUpFormState extends State<SignUpForm> {
             context,
             MaterialPageRoute(builder: (context) => LoginScreen()),
           );
+          //exception handling
         } on FirebaseAuthException catch (e) {
           String errorMessage;
           switch (e.code) {
@@ -77,8 +115,8 @@ class _SignUpFormState extends State<SignUpForm> {
               backgroundColor: Colors.red,
             ),
           );
-         } catch (e) {
           // debugging purpose
+         } catch (e) {
           print('Unexpected error: $e');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -87,6 +125,7 @@ class _SignUpFormState extends State<SignUpForm> {
             ),
           );
         }
+        //failed case
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -95,6 +134,7 @@ class _SignUpFormState extends State<SignUpForm> {
           ),
         );
       }
+      //failed case
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
