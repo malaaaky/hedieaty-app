@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:hedieaty/src/widgets/text_fields_widgets.dart';
 import 'package:hedieaty/src/screens/authentication/view/login_page.dart';
 
@@ -14,6 +16,8 @@ class _SignUpFormState extends State<SignUpForm> {
 
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordHidden = true;
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
 
   void _togglePasswordVisibility() {
     setState(() {
@@ -21,6 +25,14 @@ class _SignUpFormState extends State<SignUpForm> {
     });
   }
 
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -31,6 +43,29 @@ class _SignUpFormState extends State<SignUpForm> {
           key: _formKey,
           child: Column(
             children: [
+              // Profile Picture Placeholder and Upload Button
+              Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.grey[200],
+                    backgroundImage:
+                    _profileImage != null ? FileImage(_profileImage!) : null,
+                    child: _profileImage == null
+                        ? Icon(Icons.person, size: 55, color: Colors.grey[400])
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: 5,
+                    right: 5,
+                    child: IconButton(
+                      icon: Icon(Icons.camera_alt, color: Colors.grey[700]),
+                      onPressed: _pickImage,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
               buildTextField(
                 hintText: "Username",
                 icon: Icons.person,
@@ -80,6 +115,11 @@ class _SignUpFormState extends State<SignUpForm> {
                     print('Name: $name');
                     print('Email: $email');
                     print('Password: $password');
+                    if (_profileImage != null) {
+                      print('Profile Image Path: ${_profileImage!.path}');
+                    } else {
+                      print('No profile image selected.');
+                    }
                   }
                 },
               ),

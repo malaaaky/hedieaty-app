@@ -17,6 +17,7 @@ Future<void> main() async{
     // Optionally, print the stack trace if needed
     // debugPrint(details.stack.toString());
   };
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -34,12 +35,12 @@ class HedieatyApp extends StatelessWidget {
       ),
       initialRoute: '/login',
       routes: {
-        'login':(context)=> LoginScreen(),
-        'signup':(context)=> SignUpScreen(),
+        '/login':(context)=> LoginScreen(),
+        '/signup':(context)=> SignUpScreen(),
         '/home': (context) => HomePage(),
         '/events': (context) => EventsPage(),
         '/gifts': (context) => GiftsPage(),
-        '/profile': (context) => ProfilePage(),
+        '/profile': (context) => ProfileScreen(),
 
       },
       home: LoginScreen(), // Set your login page as the home screen
