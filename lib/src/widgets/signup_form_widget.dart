@@ -78,8 +78,6 @@ class _SignUpFormState extends State<SignUpForm> {
             'name': _nameController.text.trim(),
             'email':_emailController.text.trim(),
             'profileimage':base64Image,
-            'phone': '',
-            'address': '',
             'uid' : _uid,
           });
 

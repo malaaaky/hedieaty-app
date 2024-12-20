@@ -1,46 +1,40 @@
 class UserModel {
-  int? id;
+  String? uid;
   String? name;
   String? email;
-  String? preferences;
-  String? profilePicture; // New field for profile picture path
+  String? profileImage;
 
   UserModel({
-    this.id,
-    required this.name,
-    required this.email,
-    required this.preferences,
-    this.profilePicture,
+    this.uid,
+    this.name,
+    this.email,
+    this.profileImage,
   });
 
-  UserModel copy({
-    int? id,
+  UserModel copyWith({
+    String? uid,
     String? name,
     String? email,
-    String? preferences,
-    String? profilePicture,
+    String? profileImage,
   }) =>
       UserModel(
-        id: id ?? this.id,
+        uid: uid ?? this.uid,
         name: name ?? this.name,
         email: email ?? this.email,
-        preferences: preferences ?? this.preferences,
-        profilePicture: profilePicture ?? this.profilePicture,
+        profileImage: profileImage ?? this.profileImage,
       );
 
-  Map<String, Object?> toJson() => {
-    'id': id,
-    'name': name,
-    'email': email,
-    'preferences': preferences,
-    'profilePicture': profilePicture,
-  };
-
-  factory UserModel.fromJson(Map<String, Object?> json) => UserModel(
-    id: json['id'] as int?,
+  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
+    uid: json['uid'] as String?,
     name: json['name'] as String?,
     email: json['email'] as String?,
-    preferences: json['preferences'] as String?,
-    profilePicture: json['profilePicture'] as String?,
+    profileImage: json['profileimage'] as String?,
   );
+
+  Map<String, dynamic> toJson() => {
+    'uid': uid,
+    'name': name,
+    'email': email,
+    'profileimage': profileImage,
+  };
 }

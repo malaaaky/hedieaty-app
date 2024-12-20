@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
 
   List<EventModel> events = [];
   List<UserModel> friends = [];
-  Map<int, int> friendEventCounts = {};
+  Map<String, int> friendEventCounts = {};
 
   @override
   void initState() {
@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> {
         .where('user_id', isEqualTo: UserSession.currentUserId)
         .get();
 
-    List<int> relationList = [];
+    List<String> relationList = [];
     for (var x in relation.docs) {
       relationList.add(Relation.fromJson(x.data()).friend_id);
     }
@@ -105,13 +105,13 @@ class _HomePageState extends State<HomePage> {
 
     for (var user in newFriends.docs) {
       final friend = UserModel.fromJson(user.data());
-      friend.profilePicture ??= 'assets/default_profile.png';
+      friend.profileImage ??= 'assets/default_profile.png';
       list.add(friend);
 
-      final friendEvents =
-      events.where((event) => event.userID == friend.id).toList();
-      eventCounts[friend.id!] = friendEvents.length;
+      final friendEvents = events.where((event) => event.userID == friend.uid).toList();
+      eventCounts[friend.uid!] = friendEvents.length; // friend.uid is a String
     }
+
 
     setState(() {
       friends = list;
@@ -229,17 +229,17 @@ class _HomePageState extends State<HomePage> {
                 itemCount: friends.length,
                 itemBuilder: (context, index) {
                   final friend = friends[index];
-                  final eventCount = friendEventCounts[friend.id] ?? 0;
+                  final eventCount = friendEventCounts[friend.uid] ?? 0;
                   return Card(
                     margin: const EdgeInsets.symmetric(
                         vertical: 8, horizontal: 16),
                     child: ListTile(
                       leading: CircleAvatar(
                         radius: 40,
-                        backgroundImage: friend.profilePicture != null
-                            ? AssetImage(friend.profilePicture!)  // Make sure the profilePicture is not null and cast it appropriately
+                        backgroundImage: friend.profileImage != null
+                            ? AssetImage(friend.profileImage!)  // Make sure the profilePicture is not null and cast it appropriately
                             : AssetImage('lib/assets/guest_avatar_img.png'), // Fallback image
-                        child: friend.profilePicture == null
+                        child: friend.profileImage == null
                             ? const Icon(Icons.person) // Placeholder icon if no image is available
                             : null,
                       ),
@@ -261,8 +261,8 @@ class _HomePageState extends State<HomePage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => EventListPage(
-                              userID: friend.id,
-                              userName: friend.name.toString(),
+                              userID: friend.uid!, // friend.uid is a String
+                              userName: friend.name ?? "Unknown",
                             ),
                           ),
                         );
@@ -298,12 +298,13 @@ class _HomePageState extends State<HomePage> {
 
 class Relation {
   int user_id;
-  int friend_id;
-  Relation({this.user_id = 0, this.friend_id = 0});
+  String friend_id; // Change from int to String
+
+  Relation({this.user_id = 0, this.friend_id = ''});
 
   factory Relation.fromJson(Map<String, Object?> json) => Relation(
     user_id: json['user_id'] as int,
-    friend_id: json['friend_id'] as int,
+    friend_id: json['friend_id'] as String, // Ensure type is String
   );
 
   Map<String, Object?> toJson() => {
@@ -311,3 +312,4 @@ class Relation {
     'friend_id': friend_id,
   };
 }
+
