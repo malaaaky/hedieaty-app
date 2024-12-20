@@ -1,21 +1,15 @@
-import 'dart:convert';
-
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:flutter/material.dart';
 import 'package:hedieaty/src/screens/authentication/model/user_model.dart';
 import 'package:hedieaty/src/screens/authentication/model/user_session.dart';
-
-import 'package:hedieaty/src/widgets/bottom_navigator_bar_widget.dart';
-import 'package:hedieaty/src/utils/constants.dart';
+import 'package:hedieaty/src/screens/authentication/model/user_db.dart';
 
 import 'package:hedieaty/src/screens/events/view/event_list_page.dart';
+import 'package:hedieaty/src/screens/events/model/event_model.dart';
+
 import 'package:hedieaty/src/screens/friends/view/add_friend_widget.dart';
-import 'package:hedieaty/src/screens/profile_page.dart';
-
-import 'events/model/event_model.dart';
-
+import '../utils/constants.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,38 +19,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //for bottom navigator
-  int _selectedIndex = 0;
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    // Add navigation logic here
-    switch (index) {
-      case 0:
-      // Navigate to Home Page
-        Navigator.pushReplacementNamed(context, '/home');
-        break;
-      case 1:
-      // Navigate to Events Page
-        Navigator.pushReplacementNamed(context, '/events');
-        break;
-      case 2:
-      // Navigate to Gifts Page
-        Navigator.pushReplacementNamed(context, '/gifts');
-        break;
-      case 3:
-      // Navigate to Profile Page
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-    }
-  }
+  HedieatyUserDatabase userDatabase = HedieatyUserDatabase.instance;
 
   TextEditingController searchController = TextEditingController();
-
   List<EventModel> events = [];
   List<UserModel> friends = [];
-  Map<String, int> friendEventCounts = {};
+  Map<int, int> friendEventCounts = {};
+
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -66,7 +36,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> refreshEvents() async {
-    final newEvents = await FirebaseFirestore.instance.collection('events').get();
+    final newEvents = await FirebaseFirestore.instance
+        .collection('events')
+        .get();
     List<EventModel> eventList = [];
     for (var x in newEvents.docs) {
       eventList.add(EventModel.fromJson(x.data()));
@@ -77,24 +49,29 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> refreshFriends() async {
+    // Fetch relations where the user is the current user
     final relation = await FirebaseFirestore.instance
         .collection('friends')
         .where('user_id', isEqualTo: UserSession.currentUserId)
         .get();
 
-    List<String> relationList = [];
+    // Build the relation list
+    List<int> relationList = [];
     for (var x in relation.docs) {
-      relationList.add(Relation.fromJson(x.data()).friend_id);
+      relationList.add(FriendUser.fromJson(x.data()).friend_id);
     }
 
+    // Check if relationList is empty
     if (relationList.isEmpty) {
+      print("relationList is empty. No friends to fetch.");
       setState(() {
         friends = [];
         friendEventCounts = {};
       });
-      return;
+      return; // Exit the function early if no relations
     }
 
+    // Fetch friends from Firestore
     final newFriends = await FirebaseFirestore.instance
         .collection('users')
         .where('id', whereIn: relationList)
@@ -105,23 +82,50 @@ class _HomePageState extends State<HomePage> {
 
     for (var user in newFriends.docs) {
       final friend = UserModel.fromJson(user.data());
-      friend.profileImage ??= 'assets/default_profile.png';
+      // Add a default profile picture if none exists
+      friend.profilePicture ??= 'assets/default_profile.png';
       list.add(friend);
 
-      final friendEvents = events.where((event) => event.userID == friend.uid).toList();
-      eventCounts[friend.uid!] = friendEvents.length; // friend.uid is a String
+      // Count events for each friend
+      final friendEvents =
+      events.where((event) => event.userID == friend.id).toList();
+      eventCounts[friend.id!] = friendEvents.length;
     }
 
-
+    // Update state with the fetched friends and event counts
     setState(() {
       friends = list;
       friendEventCounts = eventCounts;
     });
+
+  }
+
+  void _onNavItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              EventListPage(userID: UserSession.currentUserId!.toInt(), userName: "My Events"),
+        ),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              ProfilePage(userId: UserSession.currentUserId!.toInt()),
+        ),
+      );
+    }
   }
 
   @override
   void dispose() {
-    searchController.dispose();
+    friends;
     super.dispose();
   }
 
@@ -143,44 +147,31 @@ class _HomePageState extends State<HomePage> {
               elevation: 0,
               title: Text(
                 'Home Page',
-                style: TextStyle(
-                  color: christmasWhite,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: christmasGold, fontSize: 24, fontWeight: FontWeight.bold),
               ),
               actions: [
                 IconButton(
-                  icon: Icon(Icons.event, color: christmasWhite),
+                  icon: Icon(Icons.event, color: christmasGold),
                   tooltip: 'View Events',
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => EventListPage(
-                          userID: UserSession.currentUserId!.toInt(),
-                          userName: "My Events",
-                        ),
-                      ),
+                      MaterialPageRoute(builder: (context) => EventListPage(userID: UserSession.currentUserId!.toInt(), userName: "My Events")),
                     );
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.account_circle, color: christmasWhite),
+                  icon: Icon(Icons.account_circle, color: christmasGold),
                   tooltip: 'Profile',
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => ProfileScreen(
-                          documentId : FirebaseAuth.instance.currentUser!.uid,
-                        ),
-                      ),
+                      MaterialPageRoute(builder: (context) => ProfilePage(userId: UserSession.currentUserId!.toInt())),
                     );
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.search, color: christmasWhite),
+                  icon: const Icon(Icons.search, color: Colors.white),
                   tooltip: 'Search Friends',
                   onPressed: () {
                     // Implement search functionality
@@ -192,7 +183,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: christmasRouge,
+                  backgroundColor: christmasYellow,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.0),
                   ),
@@ -200,12 +191,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => EventListPage(
-                        userID: UserSession.currentUserId!.toInt(),
-                        userName: "My Events",
-                      ),
-                    ),
+                    MaterialPageRoute(builder: (context) => EventListPage(userID: UserSession.currentUserId!.toInt(), userName: "My Events")),
                   );
                 },
                 child: const Text(
@@ -219,51 +205,37 @@ class _HomePageState extends State<HomePage> {
                   ? Center(
                 child: Text(
                   'No friends to display.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: christmasWhite,
-                  ),
+                  style: TextStyle(fontSize: 16, color: christmasGold),
                 ),
               )
                   : ListView.builder(
                 itemCount: friends.length,
                 itemBuilder: (context, index) {
                   final friend = friends[index];
-                  final eventCount = friendEventCounts[friend.uid] ?? 0;
+                  final eventCount = friendEventCounts[friend.id] ?? 0;
                   return Card(
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 8, horizontal: 16),
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+
                     child: ListTile(
                       leading: CircleAvatar(
                         radius: 40,
-                        backgroundImage: friend.profileImage != null
-                            ? AssetImage(friend.profileImage!)  // Make sure the profilePicture is not null and cast it appropriately
-                            : AssetImage('lib/assets/guest_avatar_img.png'), // Fallback image
-                        child: friend.profileImage == null
-                            ? const Icon(Icons.person) // Placeholder icon if no image is available
-                            : null,
+                        child: Image.asset(friend.profilePicture??'assets/images/profile_pictures/pic6.jpg'),
                       ),
                       title: Text(
                         friend.name ?? "",
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                        ),
+                        style: const TextStyle(color: Colors.black, fontSize: 18),
                       ),
                       subtitle: Text(
                         eventCount > 0
                             ? 'Upcoming Events: $eventCount'
                             : 'No Upcoming Events',
-                        style: TextStyle(color: christmasLightRed),
+                        style: TextStyle(color: christmasGreen),
                       ),
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EventListPage(
-                              userID: friend.uid!, // friend.uid is a String
-                              userName: friend.name ?? "Unknown",
-                            ),
+                            builder: (context) => EventListPage(userID: friend.id, userName: friend.name.toString()),
                           ),
                         );
                       },
@@ -285,26 +257,21 @@ class _HomePageState extends State<HomePage> {
           );
         },
         tooltip: 'Add Friend via Phone Number or Contact List',
-        backgroundColor: christmasRouge,
+        backgroundColor: christmasYellow,
         child: const Icon(Icons.person_add, color: Colors.white),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
       ),
     );
   }
 }
 
-class Relation {
+class FriendUser {
   int user_id;
-  String friend_id; // Change from int to String
+  int friend_id;
+  FriendUser({this.user_id = 0, this.friend_id = 0});
 
-  Relation({this.user_id = 0, this.friend_id = ''});
-
-  factory Relation.fromJson(Map<String, Object?> json) => Relation(
+  factory FriendUser.fromJson(Map<String, Object?> json) => FriendUser(
     user_id: json['user_id'] as int,
-    friend_id: json['friend_id'] as String, // Ensure type is String
+    friend_id: json['friend_id'] as int,
   );
 
   Map<String, Object?> toJson() => {
@@ -312,4 +279,3 @@ class Relation {
     'friend_id': friend_id,
   };
 }
-

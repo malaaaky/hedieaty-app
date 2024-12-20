@@ -11,6 +11,8 @@ import 'package:hedieaty/src/screens/events/view/event_list_page.dart';
 import 'package:hedieaty/src/screens/profile_page.dart';
 import 'package:hedieaty/src/screens/home_page.dart';
 
+import 'src/screens/login.dart';
+
 
 Future<void> main() async{
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -31,22 +33,34 @@ class HedieatyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      title: 'Hedieaty',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
-      initialRoute: '/login',
-      routes: {
-        '/login':(context)=> LoginScreen(),
-        '/signup':(context)=> SignUpScreen(),
-        '/home': (context) => HomePage(),
-        '/events': (context) => EventListPage(userID: UserSession.currentUserId!.toInt(), userName: "My Events"),
-        // '/gifts': (context) => GiftListPage(),
-        '/profile': (context) => ProfileScreen(documentId : FirebaseAuth.instance.currentUser!.uid),
-
-      },
-      home: LoginScreen(), // Set your login page as the home screen
+      home:  LoginSignupPage(),
     );
   }
+  // @override
+  // Widget build(BuildContext context) {
+  //   return MaterialApp(
+  //     debugShowCheckedModeBanner: false,
+  //     title: 'Hedieaty',
+  //     theme: ThemeData(
+  //       primarySwatch: Colors.blue,
+  //     ),
+  //     initialRoute: '/login',
+  //     routes: {
+  //       '/login':(context)=> LoginScreen(),
+  //       '/signup':(context)=> SignUpScreen(),
+  //       '/home': (context) => HomePage(),
+  //       '/events': (context) => EventListPage(userID: UserSession.currentUserId!.toInt(), userName: "My Events"),
+  //       // '/gifts': (context) => GiftListPage(),
+  //       '/profile': (context) => ProfilePage(userId: UserSession.currentUserId!.toInt()),
+  //
+  //     },
+  //     home: LoginScreen(), // Set your login page as the home screen
+  //   );
+  // }
 }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'package:hedieaty/src/screens/gifts/model/gift_db.dart';
 import 'package:hedieaty/src/screens/events/model/event_model.dart';
+import 'package:hedieaty/src/utils/constants.dart';
 
 
 class EventDetailsPage extends StatefulWidget {
@@ -21,7 +20,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   final TextEditingController locationController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
-  HedieatyDatabase eventDatabase = HedieatyDatabase.instance;
+
 
   bool isNewEvent = true;
   bool isLoading = false;
@@ -58,7 +57,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
   Future<void> saveEvent() async {
     final event = EventModel(
-      id: DateTime.now().millisecondsSinceEpoch,
+      id: DateTime
+          .now()
+          .millisecondsSinceEpoch,
       docId: widget.eventId?.toString(),
       name: nameController.text,
       date: dateController.text,
@@ -70,7 +71,6 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     if (isNewEvent) {
       final newEventRef = FirebaseFirestore.instance.collection('events').doc();
       await newEventRef.set(event.toJson());
-      await eventDatabase.createEvent(event);
     } else {
       await FirebaseFirestore.instance
           .collection('events')
@@ -96,6 +96,37 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     }
   }
 
+  Widget buildCustomTextField({
+    required String hintText,
+    required TextEditingController controller,
+    bool readOnly = false,
+    VoidCallback? onTap,
+  }) {
+    return TextFormField(
+      controller: controller,
+      readOnly: readOnly,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: hintText == 'Event Date'
+            ? Icon(Icons.calendar_today, color: Colors.white)
+            : null,
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        filled: true,
+        fillColor: Colors.red.withOpacity(0.2),
+        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(color: Colors.white),
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,8 +134,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.pink.shade100,
-              Colors.yellow.shade100,
+              christmasRed,
+              christmasGold
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -117,114 +148,61 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               elevation: 0,
               title: Text(
                 isNewEvent ? 'Add Event' : 'Edit Event',
-                style: const TextStyle(
-                  color: Colors.pink,
+                style: TextStyle(
+                  color: christmasGold,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               actions: [
-                IconButton(
-                  icon: const Icon(Icons.save, color: Colors.pink),
-                  onPressed: saveEvent,
-                ),
+
               ],
             ),
             isLoading
-                ? const Expanded(child: Center(child: CircularProgressIndicator()))
+                ? const Expanded(
+                child: Center(child: CircularProgressIndicator()))
                 : Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
+                    buildCustomTextField(
+                      hintText: 'Event Name',
                       controller: nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Event Name',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                      ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: dateController,
-                            decoration: InputDecoration(
-                              labelText: 'Event Date',
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                              ),
-                            ),
-                            readOnly: true,
-                            onTap: pickDate,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        IconButton(
-                          icon: const Icon(Icons.calendar_today, color: Colors.pink),
-                          onPressed: pickDate,
-                        ),
-                      ],
+                    buildCustomTextField(
+                      hintText: 'Event Date',
+                      controller: dateController,
+                      readOnly: true,
+                      onTap: pickDate,
                     ),
                     const SizedBox(height: 16),
-                    TextField(
+                    buildCustomTextField(
+                      hintText: 'Location',
                       controller: locationController,
-                      decoration: InputDecoration(
-                        labelText: 'Location',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                      ),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
+                    buildCustomTextField(
+                      hintText: 'Description',
                       controller: descriptionController,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                      ),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
-                      'Event Preview:',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.pink,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Card(
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Name: ${nameController.text}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text('Date: ${dateController.text}'),
-                            Text('Location: ${locationController.text}'),
-                            Text('Description: ${descriptionController.text}'),
-                          ],
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: saveEvent,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: christmasRouge,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 15),
+                        ),
+                        child: const Text(
+                          'Save Event',
+                          style: TextStyle(fontSize: 18, color: Colors.white),
                         ),
                       ),
                     ),

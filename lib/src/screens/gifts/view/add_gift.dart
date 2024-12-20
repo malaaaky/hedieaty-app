@@ -1,15 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hedieaty/src/utils/constants.dart';
 
 import 'gift_list_page.dart';
-
 import 'package:hedieaty/src/screens/gifts/model/gift_model.dart';
-import 'package:hedieaty/src/screens/gifts/model/gift_db.dart';
 
-//create a gift--> add_gift
+//add gift
 class GiftDetailsView extends StatefulWidget {
   const GiftDetailsView({super.key, this.eventId});
-
   final int? eventId;
 
   @override
@@ -17,7 +15,6 @@ class GiftDetailsView extends StatefulWidget {
 }
 
 class _GiftDetailsViewState extends State<GiftDetailsView> {
-  HedieatyDatabase giftDatabase = HedieatyDatabase.instance;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -33,6 +30,8 @@ class _GiftDetailsViewState extends State<GiftDetailsView> {
     setState(() {
       isLoading = true;
     });
+
+    //firebase collection
     final newUserRef = FirebaseFirestore.instance.collection('gifts').doc();
     final newGift = GiftModel(
       id: (newUserRef.id.hashCode),
@@ -59,7 +58,6 @@ class _GiftDetailsViewState extends State<GiftDetailsView> {
   }
 
   deleteGift() {
-    giftDatabase.deleteGift(gift.id!);
     Navigator.pop(context);
   }
 
@@ -70,8 +68,8 @@ class _GiftDetailsViewState extends State<GiftDetailsView> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.pink.shade100,
-              Colors.yellow.shade100,
+              christmasRed,
+              christmasGold,
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -84,7 +82,7 @@ class _GiftDetailsViewState extends State<GiftDetailsView> {
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 leading: IconButton(
-                  icon: Icon(Icons.arrow_back, color: Colors.pink.shade700),
+                  icon: Icon(Icons.arrow_back, color: christmasGold),
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
@@ -95,26 +93,11 @@ class _GiftDetailsViewState extends State<GiftDetailsView> {
                   },
                 ),
                 actions: [
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isFavorite = !isFavorite;
-                      });
-                    },
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: Colors.pink.shade700,
-                    ),
-                  ),
                   if (!isNewGift)
                     IconButton(
                       onPressed: deleteGift,
                       icon: const Icon(Icons.delete, color: Colors.red),
                     ),
-                  IconButton(
-                    onPressed: createGift,
-                    icon: const Icon(Icons.save, color: Colors.green),
-                  ),
                 ],
               ),
               Padding(
@@ -125,69 +108,47 @@ class _GiftDetailsViewState extends State<GiftDetailsView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextField(
+                      buildCustomTextField(
+                        hintText: 'Gift Name',
+                        icon: Icons.card_giftcard,
                         controller: nameController,
-                        cursorColor: Colors.pink.shade700,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Gift Name',
-                          border: const UnderlineInputBorder(),
-                          hintStyle: TextStyle(
-                            color: Colors.grey.shade700,
-                            fontSize: 20,
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide:
-                            BorderSide(color: Colors.pink.shade700),
-                          ),
-                        ),
                       ),
                       const SizedBox(height: 16),
-                      TextField(
+                      buildCustomTextField(
+                        hintText: 'Description',
+                        icon: Icons.description,
                         controller: descriptionController,
-                        cursorColor: Colors.pink.shade700,
-                        style: const TextStyle(color: Colors.black),
-                        decoration: InputDecoration(
-                          hintText: 'Description',
-                          border: const UnderlineInputBorder(),
-                          hintStyle: TextStyle(color: Colors.grey.shade700),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide:
-                            BorderSide(color: Colors.pink.shade700),
-                          ),
-                        ),
                       ),
                       const SizedBox(height: 16),
-                      TextField(
+                      buildCustomTextField(
+                        hintText: 'Category',
+                        icon: Icons.category,
                         controller: categoryController,
-                        cursorColor: Colors.pink.shade700,
-                        style: const TextStyle(color: Colors.black),
-                        decoration: InputDecoration(
-                          hintText: 'Category',
-                          border: const UnderlineInputBorder(),
-                          hintStyle: TextStyle(color: Colors.grey.shade700),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide:
-                            BorderSide(color: Colors.pink.shade700),
-                          ),
-                        ),
                       ),
                       const SizedBox(height: 16),
-                      TextField(
+                      buildCustomTextField(
+                        hintText: 'Price',
+                        icon: Icons.money,
                         controller: priceController,
-                        cursorColor: Colors.pink.shade700,
-                        style: const TextStyle(color: Colors.black),
-                        decoration: InputDecoration(
-                          hintText: 'Price',
-                          border: const UnderlineInputBorder(),
-                          hintStyle: TextStyle(color: Colors.grey.shade700),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide:
-                            BorderSide(color: Colors.pink.shade700),
+                      ),
+                      const SizedBox(height: 32),
+                      // Save Gift Button
+                      ElevatedButton(
+                        onPressed: createGift,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: christmasYellow,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Text(
+                          'Save Gift',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
@@ -197,6 +158,44 @@ class _GiftDetailsViewState extends State<GiftDetailsView> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildCustomTextField({
+    required String hintText,
+    required IconData icon,
+    required TextEditingController controller,
+    bool obscureText = false,
+    VoidCallback? onPasswordToggle,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: Icon(icon, color: Colors.white),
+        suffixIcon: onPasswordToggle != null
+            ? IconButton(
+          icon: Icon(
+            obscureText ? Icons.visibility : Icons.visibility_off,
+            color: Colors.white,
+          ),
+          onPressed: onPasswordToggle,
+        )
+            : null,
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        filled: true,
+        fillColor: Colors.red.withOpacity(0.2),
+        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(color: Colors.white),
         ),
       ),
     );

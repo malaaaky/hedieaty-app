@@ -1,40 +1,50 @@
+
+import 'package:hedieaty/src/screens/authentication/model/user_fields.dart';
+
+
 class UserModel {
-  String? uid;
+  int? id;
   String? name;
   String? email;
-  String? profileImage;
+  String? preferences;
+  String? profilePicture; // New field for profile picture path
 
   UserModel({
-    this.uid,
-    this.name,
-    this.email,
-    this.profileImage,
+    this.id,
+    required this.name,
+    required this.email,
+    required this.preferences,
+    this.profilePicture,
   });
 
-  UserModel copyWith({
-    String? uid,
+  UserModel copy({
+    int? id,
     String? name,
     String? email,
-    String? profileImage,
+    String? preferences,
+    String? profilePicture,
   }) =>
       UserModel(
-        uid: uid ?? this.uid,
+        id: id ?? this.id,
         name: name ?? this.name,
         email: email ?? this.email,
-        profileImage: profileImage ?? this.profileImage,
+        preferences: preferences ?? this.preferences,
+        profilePicture: profilePicture ?? this.profilePicture,
       );
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-    uid: json['uid'] as String?,
-    name: json['name'] as String?,
-    email: json['email'] as String?,
-    profileImage: json['profileimage'] as String?,
-  );
-
-  Map<String, dynamic> toJson() => {
-    'uid': uid,
-    'name': name,
-    'email': email,
-    'profileimage': profileImage,
+  Map<String, Object?> toJson() => {
+    UserFields.id: id,
+    UserFields.name: name,
+    UserFields.email: email,
+    UserFields.preferences: preferences,
+    UserFields.profilePicture: profilePicture,
   };
+
+  factory UserModel.fromJson(Map<String, Object?> json) => UserModel(
+    id: json[UserFields.id] as int?,
+    name: json[UserFields.name] as String?,
+    email: json[UserFields.email] as String?,
+    preferences: json[UserFields.preferences] as String?,
+    profilePicture: json[UserFields.profilePicture] as String?,
+  );
 }

@@ -83,6 +83,15 @@ flutter:
     - lib/assets/christmas_bell_img.png
     - lib/assets/christmas_sock_image.png
     - lib/assets/guest_avatar_img.png
+    - lib/assets/profiles/profile.jpg
+    - lib/assets/profiles/profile2.jpg
+    - lib/assets/profiles/profile3.jpg
+    - lib/assets/profiles/profile4.webp
+    - lib/assets/profiles/profile8.webp
+    - lib/assets/profiles/guest_pic.png
+    - lib/assets/avatars/avatar2.jpg
+    - lib/assets/avatars/avatar3.webp
+    - lib/assets/avatars/avatar4.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

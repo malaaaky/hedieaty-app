@@ -1,12 +1,12 @@
-import 'dart:math';
-import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:hedieaty/src/screens/home_page.dart';
-import '../../../utils/constants.dart';
-import '../../authentication/model/user_session.dart';
-import '../model/event_model.dart';
+import 'package:hedieaty/src/screens/authentication/model/user_session.dart';
+import 'package:hedieaty/src/screens/gifts/view/gift_list_page.dart';
+import 'package:hedieaty/src/screens/events/view/create_event_page.dart';
+import 'package:hedieaty/src/screens/events/model/event_model.dart';
+import 'package:hedieaty/src/utils/constants.dart';
 
 
 class EventListPage extends StatefulWidget {
@@ -70,23 +70,23 @@ class _EventListPageState extends State<EventListPage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              actions: [
-                if (widget.userID==UserSession.currentUserId)
-                  IconButton(
-                    icon: const Icon(Icons.add, color: Colors.white),
-                    onPressed: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(),
-                          //TODO raga3i comment wa sheli homepage
-                          // builder: (context) => EventDetailsPage(friendId: UserSession.currentUserId),
-                        ),
-                      );
-                      setupEventListener();
-                    },
-                  ),
-              ],
+              // actions: [
+              //   if (widget.userID == UserSession.currentUserId)
+              //     IconButton(
+              //       icon: Icon(Icons.add, color: christmasGold),
+              //       onPressed: () async {
+              //         await Navigator.push(
+              //           context,
+              //           MaterialPageRoute(
+              //             builder: (context) =>
+              //                 EventDetailsPage(friendId: UserSession
+              //                     .currentUserId),
+              //           ),
+              //         );
+              //         setupEventListener();
+              //       },
+              //     ),
+              // ],
             ),
             Expanded(
               child: isLoading
@@ -97,7 +97,7 @@ class _EventListPageState extends State<EventListPage> {
                   'No events yet',
                   style: TextStyle(
                     fontSize: 16,
-                    color: christmasGold,
+                    color: christmasYellow,
                   ),
                 ),
               )
@@ -106,7 +106,8 @@ class _EventListPageState extends State<EventListPage> {
                 itemBuilder: (context, index) {
                   final event = events[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 8, horizontal: 16),
                     child: ListTile(
                       title: Text(
                         event.name ?? '',
@@ -126,9 +127,8 @@ class _EventListPageState extends State<EventListPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => HomePage(),
-                            //TODO raga3i comment wa sheli homepage
-                            // builder: (context) => GiftListPage(eventId: event.id!),
+                            builder: (context) =>
+                                GiftListPage(eventId: event.id!),
                           ),
                         );
                       },
@@ -136,26 +136,18 @@ class _EventListPageState extends State<EventListPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.white),
+                            icon: Icon(Icons.edit, color: christmasGold),
                             onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => HomePage(),
-                                  //TODO raga3i comment wa sheli homepage
-                                  // builder: (context) => EventDetailsPage(
-                                  //   eventId: event.id,
-                                  //   friendId: UserSession.currentUserId,
-                                  // ),
+                                  builder: (context) =>
+                                      EventDetailsPage(
+                                        eventId: event.id,
+                                        friendId: UserSession.currentUserId,
+                                      ),
                                 ),
                               ).then((_) => setupEventListener());
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: (){
-                              deleteEvent(event);
-
                             },
                           ),
                         ],
@@ -168,15 +160,25 @@ class _EventListPageState extends State<EventListPage> {
           ],
         ),
       ),
+      floatingActionButton: widget.userID == UserSession.currentUserId
+          ? FloatingActionButton(
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EventDetailsPage(friendId: UserSession.currentUserId),
+            ),
+          );
+          setupEventListener();
+        },
+        backgroundColor: christmasYellow,
+        child: Icon(Icons.add, color: Colors.white),
+      )
+          : null,
     );
   }
 
-  void deleteEvent(EventModel event) async{
-    var collection =  FirebaseFirestore.instance
-        .collection('events');
-    await collection.doc(event.docId.toString())
-        .delete();
-    setupEventListener();
-    dev.log('x ${event.description.toString()}');
+  void deleteEvent(EventModel event) {
+    print('deleted');
   }
 }
