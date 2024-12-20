@@ -9,6 +9,7 @@ import 'package:hedieaty/src/utils/constants.dart';
 import 'authentication/model/user_session.dart';
 import 'events/view/event_list_page.dart';
 import 'gifts/view/gift_list_page.dart';
+import 'gifts/view/my_pledged_gifts_page.dart';
 import 'home_page.dart';
 import 'package:hedieaty/src/widgets/profile_widgets.dart';
 import 'package:hedieaty/src/screens/events/view/event_list_page.dart';
@@ -159,7 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => GiftListPage(),
+                                            builder: (context) => MyPledgedGiftsPage(),
                                           ),
                                         );
                                       },

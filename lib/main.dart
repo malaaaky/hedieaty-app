@@ -42,7 +42,7 @@ class HedieatyApp extends StatelessWidget {
         '/signup':(context)=> SignUpScreen(),
         '/home': (context) => HomePage(),
         '/events': (context) => EventListPage(userID: UserSession.currentUserId!.toInt(), userName: "My Events"),
-        '/gifts': (context) => GiftsPage(),
+        // '/gifts': (context) => GiftListPage(),
         '/profile': (context) => ProfileScreen(documentId : FirebaseAuth.instance.currentUser!.uid),
 
       },

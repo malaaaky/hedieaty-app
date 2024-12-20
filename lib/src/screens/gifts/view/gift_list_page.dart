@@ -10,7 +10,6 @@ import 'package:hedieaty/src/screens/gifts/model/gift_db.dart';
 
 class GiftListPage extends StatefulWidget {
   final int eventId;
-
   GiftListPage({required this.eventId});
 
   @override
