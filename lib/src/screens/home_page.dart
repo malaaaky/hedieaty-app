@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:hedieaty/src/screens/authentication/model/user_model.dart';
 import 'package:hedieaty/src/screens/authentication/model/user_session.dart';
 import 'package:hedieaty/src/screens/authentication/model/user_db.dart';
-
 import 'package:hedieaty/src/screens/events/view/event_list_page.dart';
 import 'package:hedieaty/src/screens/events/model/event_model.dart';
-
 import 'package:hedieaty/src/screens/friends/view/add_friend_widget.dart';
 import '../utils/constants.dart';
 import 'profile_page.dart';
+import 'package:hedieaty/src/screens/friends/model/frienduser.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,9 +35,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> refreshEvents() async {
-    final newEvents = await FirebaseFirestore.instance
-        .collection('events')
-        .get();
+    final newEvents = await FirebaseFirestore.instance.collection('events').get();
     List<EventModel> eventList = [];
     for (var x in newEvents.docs) {
       eventList.add(EventModel.fromJson(x.data()));
@@ -49,29 +46,25 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> refreshFriends() async {
-    // Fetch relations where the user is the current user
     final relation = await FirebaseFirestore.instance
         .collection('friends')
         .where('user_id', isEqualTo: UserSession.currentUserId)
         .get();
 
-    // Build the relation list
     List<int> relationList = [];
     for (var x in relation.docs) {
       relationList.add(FriendUser.fromJson(x.data()).friend_id);
     }
 
-    // Check if relationList is empty
     if (relationList.isEmpty) {
       print("relationList is empty. No friends to fetch.");
       setState(() {
         friends = [];
         friendEventCounts = {};
       });
-      return; // Exit the function early if no relations
+      return;
     }
 
-    // Fetch friends from Firestore
     final newFriends = await FirebaseFirestore.instance
         .collection('users')
         .where('id', whereIn: relationList)
@@ -82,22 +75,18 @@ class _HomePageState extends State<HomePage> {
 
     for (var user in newFriends.docs) {
       final friend = UserModel.fromJson(user.data());
-      // Add a default profile picture if none exists
       friend.profilePicture ??= 'assets/default_profile.png';
       list.add(friend);
 
-      // Count events for each friend
       final friendEvents =
       events.where((event) => event.userID == friend.id).toList();
       eventCounts[friend.id!] = friendEvents.length;
     }
 
-    // Update state with the fetched friends and event counts
     setState(() {
       friends = list;
       friendEventCounts = eventCounts;
     });
-
   }
 
   void _onNavItemTapped(int index) {
@@ -132,6 +121,32 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Hedieaty",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
+        backgroundColor: christmasRed,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () {},
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.white),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.notifications, color: Colors.white),
+            onPressed: () {},
+          ),
+        ],
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -142,62 +157,78 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Column(
           children: [
-            AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              title: Text(
-                'Home Page',
-                style: TextStyle(color: christmasGold, fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              actions: [
-                IconButton(
-                  icon: Icon(Icons.event, color: christmasGold),
-                  tooltip: 'View Events',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EventListPage(userID: UserSession.currentUserId!.toInt(), userName: "My Events")),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.account_circle, color: christmasGold),
-                  tooltip: 'Profile',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ProfilePage(userId: UserSession.currentUserId!.toInt())),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.search, color: Colors.white),
-                  tooltip: 'Search Friends',
-                  onPressed: () {
-                    // Implement search functionality
-                  },
-                ),
-              ],
-            ),
+            // Row for buttons
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: christmasYellow,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: christmasYellow,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EventListPage(
+                              userID: UserSession.currentUserId!.toInt(),
+                              userName: "My Events"),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Create Your Event',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
                   ),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => EventListPage(userID: UserSession.currentUserId!.toInt(), userName: "My Events")),
-                  );
-                },
-                child: const Text(
-                  'Create Your Own Event/List',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: christmasYellow,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EventListPage(
+                              userID: UserSession.currentUserId!.toInt(),
+                              userName: "My Events"),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Events',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: christmasYellow,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfilePage(
+                              userId: UserSession.currentUserId!.toInt()),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Profile',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -214,16 +245,18 @@ class _HomePageState extends State<HomePage> {
                   final friend = friends[index];
                   final eventCount = friendEventCounts[friend.id] ?? 0;
                   return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 8, horizontal: 16),
                     child: ListTile(
                       leading: CircleAvatar(
                         radius: 40,
-                        child: Image.asset(friend.profilePicture??'assets/images/profile_pictures/pic6.jpg'),
+                        child: Image.asset(friend.profilePicture ??
+                            'assets/images/profile_pictures/pic6.jpg'),
                       ),
                       title: Text(
                         friend.name ?? "",
-                        style: const TextStyle(color: Colors.black, fontSize: 18),
+                        style: const TextStyle(
+                            color: Colors.black, fontSize: 18),
                       ),
                       subtitle: Text(
                         eventCount > 0
@@ -235,7 +268,9 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => EventListPage(userID: friend.id, userName: friend.name.toString()),
+                            builder: (context) => EventListPage(
+                                userID: friend.id,
+                                userName: friend.name.toString()),
                           ),
                         );
                       },
@@ -264,18 +299,3 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class FriendUser {
-  int user_id;
-  int friend_id;
-  FriendUser({this.user_id = 0, this.friend_id = 0});
-
-  factory FriendUser.fromJson(Map<String, Object?> json) => FriendUser(
-    user_id: json['user_id'] as int,
-    friend_id: json['friend_id'] as int,
-  );
-
-  Map<String, Object?> toJson() => {
-    'user_id': user_id,
-    'friend_id': friend_id,
-  };
-}

@@ -6,6 +6,8 @@ import 'package:hedieaty/src/screens/home_page.dart';
 import 'package:hedieaty/src/screens/authentication/model/user_model.dart';
 import 'package:hedieaty/src/screens/authentication/model/user_session.dart';
 import 'package:hedieaty/src/utils/constants.dart';
+import 'package:hedieaty/src/screens/friends/model/frienduser.dart';
+
 
 class FriendDetailsView extends StatefulWidget {
   const FriendDetailsView({super.key, this.userId, this.friendId});
@@ -168,18 +170,18 @@ class _FriendDetailsViewState extends State<FriendDetailsView> {
   }
 }
 
-class FriendUser {
-  int user_id;
-  int friend_id;
-  FriendUser({this.user_id = 0, this.friend_id = 0});
-
-  factory FriendUser.fromJson(Map<String, Object?> json) => FriendUser(
-    user_id: json['user_id'] as int,
-    friend_id: json['friend_id'] as int,
-  );
-
-  Map<String, Object?> toJson() => {
-    'user_id': user_id,
-    'friend_id': friend_id,
-  };
-}
+// class FriendUser {
+//   int user_id;
+//   int friend_id;
+//   FriendUser({this.user_id = 0, this.friend_id = 0});
+//
+//   factory FriendUser.fromJson(Map<String, Object?> json) => FriendUser(
+//     user_id: json['user_id'] as int,
+//     friend_id: json['friend_id'] as int,
+//   );
+//
+//   Map<String, Object?> toJson() => {
+//     'user_id': user_id,
+//     'friend_id': friend_id,
+//   };
+// }
