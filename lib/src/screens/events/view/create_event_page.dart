@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../model/event_model.dart';
+import 'package:hedieaty/src/screens/gifts/model/gift_db.dart';
+import 'package:hedieaty/src/screens/events/model/event_model.dart';
+
 
 class EventDetailsPage extends StatefulWidget {
   final int? eventId;
